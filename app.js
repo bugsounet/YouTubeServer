@@ -135,8 +135,10 @@ app.get('/', async (req, res) => {
 
   var FreeDays = dates.inRange(now, startDate, endDate)
   console.log("Query:", req.query, (FreeDays ? "In FreeDays!" : ""))
-  if (FreeDays || ForceFreeDays) res.sendFile(path.join(__dirname, '/youtube.html'))
-  else {
+  if (FreeDays || ForceFreeDays) {
+     if (!req.query.id) return res.sendFile(path.join(__dirname, '/403.html'))
+     res.sendFile(path.join(__dirname, '/youtube.html'))
+  } else {
     if (!req.query.username || !req.query.token || !req.query.id) return res.sendFile(path.join(__dirname, '/403.html'))
     let username = req.query.username
     let token = req.query.token
@@ -149,6 +151,10 @@ app.get('/', async (req, res) => {
 
 app.get('/403.css', (req, res) => {
   res.sendFile(path.join(__dirname, '/403.css'))
+})
+
+app.get('/TweenMax.js', (req, res) => {
+  res.sendFile(path.join(__dirname, '/TweenMax.min.js'))
 })
 
 app.get('*', function(req, res){
