@@ -1,0 +1,24 @@
+{
+  "name": "YouTubeServer",
+  "version": "1.0.0",
+  "rev": "211201-1",
+  "description": "YouTube Web Server",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "bugsounet",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bugsounet/YouTubeServer"
+  },
+  "bugs": {
+    "url": "http://forum.bugsounet.fr"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6"
+  }
+}

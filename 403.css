@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css?family=Vollkorn:700');
+
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+background: linear-gradient(45deg, #021e29 0%, #00537d 100%);
+}
+#httpresponse{
+  font-family: 'Vollkorn', serif;
+  margin-left:35px;
+  color:white;
+}
+h1{
+  font-size: 6em;
+  margin:0;
+}
+h2{
+  font-size: 2em;
+  margin-top:0;
+}
+#policeman{
+  width:350px;
+  display:block;
+  overflow:visible;
+  position:absolute;
+}
+
+
+@media only screen and (max-width : 720px){
+  #policeman{
+    max-height:50%;
+  }
+}

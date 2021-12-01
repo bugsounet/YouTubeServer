@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="./403.css">
+  </head>
+  <body>
+    <div id="httpresponse">
+      <h1>403</h1>
+      <h2>Access denied</h2>
+      <h3>bugsounet.fr</h3>
+    </div>
+    <svg id="policeman" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 610.53 718.27"><defs><style>.cls-1{fill:#c1c1c1;}.cls-2{fill:#e6a964;}.cls-3{fill:#fcc082;}.cls-4{fill:#009edc;}.cls-5{fill:#d39d29;}.cls-6{fill:#fff;}</style></de$
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/TweenMax.min.js"></script>
+    <script>
+      TweenMax.set('#policeman',{xPercent:-50, yPercent:0, left:"50%", bottom:"0%"});
+      TweenMax.set('#hand',{transformOrigin:"center bottom",y:50});
+      TweenMax.fromTo('#hand',0.3,{rotation:-10},{rotation:10,yoyo:true,repeat:-1,ease:Power1.easeInOut});
+    </script>
+    <script>
+      setTimeout(() => console.log("[YT] Status: true"), 1000)
+      setTimeout(() => {
+        console.log("[YT] Status: false")
+        console.log("[YT] Ended: true")
+      }, 10000)
+    </script>
+  </body>
+</html>
