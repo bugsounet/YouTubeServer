@@ -15,5 +15,13 @@
       TweenMax.set('#hand',{transformOrigin:"center bottom",y:50});
       TweenMax.fromTo('#hand',0.3,{rotation:-10},{rotation:10,yoyo:true,repeat:-1,ease:Power1.easeInOut});
     </script>
+    <script>
+      // YT callbacks
+      setTimeout(() => console.log("[YT] Status: true"), 1000)
+      setTimeout(() => {
+        console.log("[YT] Status: false")
+        console.log("[YT] Ended: true")
+      }, 10000)
+    </script>
   </body>
 </html>
