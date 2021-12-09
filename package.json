@@ -3,9 +3,9 @@
   "version": "1.1.0",
   "rev": "211201-1",
   "description": "YouTube Web Server",
-  "main": "app.js",
+  "main": "server/app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node server/app.js"
   },
   "author": "bugsounet",
   "license": "MIT",
