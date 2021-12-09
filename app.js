@@ -7,7 +7,7 @@ const requestPromise = require("request-promise")
 const debug = true
 const ForceFreeDays = false
 
-if (debug) log = (...args) => { console.log("["+moment().format("L HH:mm:ss")+"]", ...args) }
+if (debug) log = (...args) => { console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", ...args) }
 else log = (...args) => { /* do nothing */ }
 
 async function Login(login, token) {
@@ -161,5 +161,5 @@ app.get('*', function(req, res){
 });
 
 app.listen(port, () => {
-  console.log("["+moment().format("L hh:mm:ss")+"]",`@bugsounet YouTube Server listening at http://localhost:${port}`)
+  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]",`@bugsounet YouTube Server listening at http://localhost:${port}`)
 })
