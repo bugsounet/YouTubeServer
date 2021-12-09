@@ -132,8 +132,8 @@ app.get('/', async (req, res) => {
   endDate.setDate(7);
   endDate.setHours(19,0,0);
 
-  var FreeDays = dates.inRange(now, startDate, endDate)
-  log("Query:", req.query, (FreeDays ? "In FreeDays!" : ""))
+  var FreeDays = dates.inRange(now, startDate, endDate) || ForceFreeDays
+  log((FreeDays ? "FreeDays Query:" : "Query:"), req.query)
   if (FreeDays || ForceFreeDays) {
      if (!req.query.id) return res.sendFile(path.join(__dirname, '/403.html'))
      res.sendFile(path.join(__dirname, '/youtube.html'))
