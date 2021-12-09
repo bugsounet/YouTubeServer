@@ -1,13 +1,30 @@
 const express = require('express')
 const path = require('path')
 const moment = require("moment")
-const app = express()
-const port = 2411
 const requestPromise = require("request-promise")
-const debug = true
-const ForceFreeDays = false
+const app = express()
 
-if (debug) log = (...args) => { console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", ...args) }
+var config = {}
+var myDefault = {
+  debug: false,
+  port: 2411,
+  FreeDaysStart: 1,
+  FreeDaysStop: 7,
+  ForceFreeDays: false
+}
+
+console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]","@bugsounet YouTube Server v"+ require("./package.json").version, "starts...")
+
+try {
+  config = require("./config.js").config
+  config = Object.assign({}, myDefault, config)
+} catch (e) {
+  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Error by reading config file!", e)
+  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Starting with default configuration")
+  config= myDefault
+}
+
+if (config.debug) log = (...args) => { console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", ...args) }
 else log = (...args) => { /* do nothing */ }
 
 async function Login(login, token) {
@@ -127,14 +144,14 @@ app.get('/', async (req, res) => {
   var startDate = new Date();
   var endDate = new Date();
 
-  startDate.setDate(1);
-  startDate.setHours(1,0,0);
-  endDate.setDate(7);
-  endDate.setHours(19,0,0);
+  startDate.setDate(config.FreeDaysStart);
+  startDate.setHours(0,1,0);
+  endDate.setDate(config.FreeDaysStop);
+  endDate.setHours(23,59,0);
 
-  var FreeDays = dates.inRange(now, startDate, endDate) || ForceFreeDays
+  var FreeDays = dates.inRange(now, startDate, endDate) || config.ForceFreeDays
   log((FreeDays ? "FreeDays Query:" : "Query:"), req.query)
-  if (FreeDays || ForceFreeDays) {
+  if (FreeDays) {
      if (!req.query.id) return res.sendFile(path.join(__dirname, '/403.html'))
      res.sendFile(path.join(__dirname, '/youtube.html'))
   } else {
@@ -160,6 +177,7 @@ app.get('*', function(req, res){
   res.sendFile(path.join(__dirname, '/403.html'))
 });
 
-app.listen(port, () => {
-  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]",`@bugsounet YouTube Server listening at http://localhost:${port}`)
+app.listen(config.port, () => {
+  log("Configuration:", config)
+  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]",`Listening at http://localhost:${config.port}`)
 })
