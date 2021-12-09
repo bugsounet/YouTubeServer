@@ -1,14 +1,14 @@
 const express = require('express')
 const path = require('path')
+const moment = require("moment")
 const app = express()
 const port = 2411
 const requestPromise = require("request-promise")
 const debug = true
 const ForceFreeDays = false
 
-if (debug) log = (...args) => { console.log("[YT]", ...args) }
+if (debug) log = (...args) => { console.log("["+moment().format("L HH:mm:ss")+"]", ...args) }
 else log = (...args) => { /* do nothing */ }
-
 
 async function Login(login, token) {
   log("Try to login to @bugsounet forum...")
@@ -70,8 +70,7 @@ async function Query(login, token) {
   } else {
     log("no response")
     return false
-  }
-    
+  }    
 }
 
 async function main(username, token) {
@@ -131,10 +130,10 @@ app.get('/', async (req, res) => {
   startDate.setDate(1);
   startDate.setHours(1,0,0);
   endDate.setDate(7);
-  endDate.setHours(1,0,0);
+  endDate.setHours(19,0,0);
 
   var FreeDays = dates.inRange(now, startDate, endDate)
-  console.log("Query:", req.query, (FreeDays ? "In FreeDays!" : ""))
+  log("Query:", req.query, (FreeDays ? "In FreeDays!" : ""))
   if (FreeDays || ForceFreeDays) {
      if (!req.query.id) return res.sendFile(path.join(__dirname, '/403.html'))
      res.sendFile(path.join(__dirname, '/youtube.html'))
@@ -162,5 +161,5 @@ app.get('*', function(req, res){
 });
 
 app.listen(port, () => {
-  console.log(`@bugsounet YouTube Server listening at http://localhost:${port}`)
+  console.log("["+moment().format("L hh:mm:ss")+"]",`@bugsounet YouTube Server listening at http://localhost:${port}`)
 })
