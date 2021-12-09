@@ -1,6 +1,6 @@
 {
   "name": "YouTubeServer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "rev": "211201-1",
   "description": "YouTube Web Server",
   "main": "app.js",
@@ -19,6 +19,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "request": "^2.88.2",
+    "moment": "^2.29.1",
     "request-promise": "^4.2.6"
   }
 }
