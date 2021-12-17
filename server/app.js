@@ -150,19 +150,25 @@ app.get('/', async (req, res) => {
   endDate.setHours(23,59,0);
 
   var FreeDays = dates.inRange(now, startDate, endDate) || config.ForceFreeDays
-  log((FreeDays ? "FreeDays Query:" : "Query:"), req.query)
-  if (FreeDays) {
-     if (!req.query.id) return res.sendFile(path.join(__dirname, '../html/403.html'))
-     res.sendFile(path.join(__dirname, '../html/youtube.html'))
-  } else {
-    if (!req.query.username || !req.query.token || !req.query.id) return res.sendFile(path.join(__dirname, '../html/403.html'))
-    let username = req.query.username
-    let token = req.query.token
-    
-    let access = await main(username, token)
-    if (access) res.sendFile(path.join(__dirname, '../html/youtube.html'))
-    else res.sendFile(path.join(__dirname, '../html/403.html'))
+  log("Query:", req.query)
+
+  if (!req.query.id) return res.sendFile(path.join(__dirname, '../html/403.html'))
+
+  if (req.query.username === "null" || req.query.token === "null") {
+    if (FreeDays) { 
+      log("FreeDays Played")
+      return res.sendFile(path.join(__dirname, '../html/youtube.html'))
+    }
+    log("Error 403")
+    return res.sendFile(path.join(__dirname, '../html/403.html'))
   }
+
+  let username = req.query.username
+  let token = req.query.token
+
+  let access = await main(username, token)
+  if (access) res.sendFile(path.join(__dirname, '../html/youtube.html'))
+  else res.sendFile(path.join(__dirname, '../html/403.html'))
 });
 
 app.get('/403.css', (req, res) => {
