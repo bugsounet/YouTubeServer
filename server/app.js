@@ -156,10 +156,10 @@ app.get('/', async (req, res) => {
 
   if (req.query.username === "null" || req.query.token === "null") {
     if (FreeDays) { 
-      log("FreeDays Played")
+      log("Video Played for FreeDays")
       return res.sendFile(path.join(__dirname, '../html/youtube.html'))
     }
-    log("Error 403")
+    log("Send Error 403")
     return res.sendFile(path.join(__dirname, '../html/403.html'))
   }
 
