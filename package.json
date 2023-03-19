@@ -1,7 +1,7 @@
 {
   "name": "YouTubeServer",
-  "version": "1.1.1",
-  "rev": "211201-1",
+  "version": "1.2.0",
+  "rev": "230319",
   "description": "YouTube Web Server",
   "main": "server/app.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "url": "https://github.com/bugsounet/YouTubeServer"
   },
   "bugs": {
-    "url": "http://forum.bugsounet.fr"
+    "url": "https://forum.bugsounet.fr"
   },
   "dependencies": {
     "express": "^4.17.1",
