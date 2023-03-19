@@ -1,5 +1,5 @@
 var database = {
-  "admin": "admin"
+  "admin": "testage"
 }
 
 exports.database = database
