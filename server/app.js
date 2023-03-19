@@ -1,7 +1,6 @@
 const express = require('express')
 const path = require('path')
 const moment = require("moment")
-const requestPromise = require("request-promise")
 const app = express()
 
 var config = {}
@@ -19,97 +18,36 @@ try {
   config = require("../config.js").config
   config = Object.assign({}, myDefault, config)
 } catch (e) {
-  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Error by reading config file!", e)
-  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Starting with default configuration")
+  console.error("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Error by reading config file!", e)
+  console.warn("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Starting with default configuration")
   config= myDefault
+}
+
+try {
+  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Reading Database...")
+  database = require("../database/database.js").database
+  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "There is", Object.keys(database).length, "username in database")
+} catch (e) {
+  console.error("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Error by reading database file!", e)
+  process.exit(255)
 }
 
 if (config.debug) log = (...args) => { console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", ...args) }
 else log = (...args) => { /* do nothing */ }
 
-async function Login(login, token) {
-  if (!login) {
-    log("Login missing!")
-    return false
-  }
-
-  log("Try to login to @bugsounet forum...", login)
-
-  let res = await requestPromise
-    .get('https://forum.bugsounet.fr/api/login', {
-      headers: {
-        "Authorization":  "Bearer " + token
-      }
-    })
-    .catch(function (err) {
-      console.error("error: " + err)
-      return false
-    })
-
-  if (!res) return false
-
-  var username = res.slice(7,res.length-1)
-  if (username == (login.toLowerCase())) {
-    log(username, "Login...")
-    return username
-  }
-  else {
-    log("Login error!")
-    return false
-  }
-}
-
-async function Query(login, token) {
-  let res = await requestPromise
-    .get('https://forum.bugsounet.fr/api/groups/youtube/members', {
-      headers: {
-        "Authorization":  "Bearer " + token
-      },
-    })
-    .catch(function (err) {
-      console.log("error: " + err)
-      return false
-    })
-
-  if (!res) return false
-
-  let response = JSON.parse(res)
-  if (response) {
-    if (response.users.length) {
-      var BreakException = {}
-      try {
-        response.users.forEach(user => {
-          if (user.userslug == login) {
-            access = 1
-            throw BreakException
-          }
-        })
-      } catch (e) {
-        if (e !== BreakException) throw e
-      }
-    }
-    return access ? true : false
+function login(username, password, FreeDays) {
+  if (FreeDays) {
+    log("FreeDays Playing")
+    return true
   } else {
-    log("no response")
-    return false
-  }
-}
-
-async function main(username, token) {
-  let login = await Login(username, token)
-  if (login) {
-    let access = await Query(login, token)
-    if (access) {
-      log(login, "have Access to YouTube")
+    if (!username || !password) return false
+    if (database[username] && database[username] == password) {
+      log("Login:", username)
       return true
     }
-    else {
-      log("NO Access to YouTube")
-      return false
-    }
+    log("Unknow username:", username)
+    return false
   }
-  else log("NO Access to YouTube")
-  return false
 }
 
 var dates = {
@@ -161,19 +99,10 @@ app.get('/', async (req, res) => {
 
   if (!req.query.id) return res.sendFile(path.join(__dirname, '../html/403.html'))
 
-  if (req.query.username === "null" || req.query.token === "null") {
-    if (FreeDays) {
-      log("Video Played for FreeDays")
-      return res.sendFile(path.join(__dirname, '../html/youtube.html'))
-    }
-    log("Send Error 403")
-    return res.sendFile(path.join(__dirname, '../html/403.html'))
-  }
-
   let username = req.query.username
-  let token = req.query.token
+  let password = req.query.password
 
-  let access = await main(username, token)
+  let access = await login(username, password, FreeDays)
   if (access) res.sendFile(path.join(__dirname, '../html/youtube.html'))
   else res.sendFile(path.join(__dirname, '../html/403.html'))
 });
