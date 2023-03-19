@@ -12,40 +12,45 @@ var myDefault = {
   ForceFreeDays: false
 }
 
-console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]","@bugsounet YouTube Server v"+ require("../package.json").version, "starts...")
+function getTime() {
+  let current = "["+ moment().format("DD/MM/YY HH:mm:ss") + "]"
+  return current
+}
+
+console.log(getTime(),"@bugsounet YouTube Server v"+ require("../package.json").version, "starts...")
 
 try {
   config = require("../config.js").config
   config = Object.assign({}, myDefault, config)
 } catch (e) {
-  console.error("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Error by reading config file!", e)
-  console.warn("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Starting with default configuration")
+  console.error(getTime(), "Error by reading config file!", e)
+  console.warn(getTime(), "Starting with default configuration")
   config= myDefault
 }
 
 try {
-  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Reading Database...")
+  console.log(getTime(), "Reading Database...")
   database = require("../database/database.js").database
-  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "There is", Object.keys(database).length, "username in database")
+  console.log(getTime(), "There is", Object.keys(database).length, "username in database")
 } catch (e) {
-  console.error("["+moment().format("DD/MM/YY HH:mm:ss")+"]", "Error by reading database file!", e)
+  console.error(getTime(), "Error by reading database file!", e)
   process.exit(255)
 }
 
-if (config.debug) log = (...args) => { console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]", ...args) }
+if (config.debug) log = (...args) => { console.log(getTime(), ...args) }
 else log = (...args) => { /* do nothing */ }
 
 function login(username, password, FreeDays) {
   if (FreeDays) {
-    log("FreeDays Playing")
+    log("[LOGIN] FreeDays Playing")
     return true
   } else {
     if (!username || !password) return false
     if (database[username] && database[username] == password) {
-      log("Login:", username)
+      log("[LOGIN] Login:", username)
       return true
     }
-    log("Unknow username:", username)
+    console.log(getTime(), "[LOGIN] Login Failed:", username)
     return false
   }
 }
@@ -100,7 +105,7 @@ app.get('/', async (req, res) => {
   if (!req.query.id) return res.sendFile(path.join(__dirname, '../html/403.html'))
 
   let username = req.query.username
-  let password = req.query.password
+  let password = req.query.password || req.query.token // v1.x compatibility
 
   let access = await login(username, password, FreeDays)
   if (access) res.sendFile(path.join(__dirname, '../html/youtube.html'))
@@ -121,5 +126,5 @@ app.get('*', function(req, res){
 
 app.listen(config.port, () => {
   log("Configuration:", config)
-  console.log("["+moment().format("DD/MM/YY HH:mm:ss")+"]",`Listening at http://localhost:${config.port}`)
+  console.log(getTime(),`Listening at http://localhost:${config.port}`)
 })
