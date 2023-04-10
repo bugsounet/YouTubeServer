@@ -2,7 +2,9 @@ const express = require('express')
 const path = require('path')
 const moment = require("moment")
 const app = express()
+const io = require("socket.io")
 
+var server = null
 var config = {}
 var myDefault = {
   debug: false,
@@ -11,6 +13,7 @@ var myDefault = {
   FreeDaysStop: 7,
   ForceFreeDays: false
 }
+var database = {}
 
 function getTime() {
   let current = "["+ moment().format("DD/MM/YY HH:mm:ss") + "]"
@@ -30,8 +33,14 @@ try {
 
 try {
   console.log(getTime(), "Reading Database...")
-  database = require("../database/database.js").database
-  console.log(getTime(), "There is", Object.keys(database).length, "username in database")
+  let tmpDatabase = require("../database/database.js").database
+  for (const [key, value] of Object.entries(tmpDatabase)) {
+    database[key]= {
+      password: value,
+      socket: null
+    }
+  }
+  console.log(getTime(), "There is", Object.keys(database).length, "username in database", )
 } catch (e) {
   console.error(getTime(), "Error by reading database file!", e)
   process.exit(255)
@@ -46,7 +55,7 @@ function login(username, password, FreeDays) {
     return true
   } else {
     if (!username || !password) return false
-    if (database[username] && database[username] == password) {
+    if (database[username] && database[username].password == password) {
       log("[LOGIN] Login:", username)
       return true
     }
@@ -86,6 +95,7 @@ var dates = {
 }
 
 /** main code **/
+var socket = new io.Server(server)
 app.get('/', async (req, res) => {
   var now = new Date();
   var day = now.getDate();
@@ -108,7 +118,12 @@ app.get('/', async (req, res) => {
   let password = req.query.password || req.query.token // v1.x compatibility
 
   let access = await login(username, password, FreeDays)
-  if (access) res.sendFile(path.join(__dirname, '../html/youtube.html'))
+  if (access) {
+    res.sendFile(path.join(__dirname, '../html/youtube.html'))
+    socket.once('connection', (client) => {
+      console.log("client:", client)
+    })
+  }
   else res.sendFile(path.join(__dirname, '../html/403.html'))
 });
 
@@ -124,7 +139,7 @@ app.get('*', function(req, res){
   res.sendFile(path.join(__dirname, '../html/403.html'))
 });
 
-app.listen(config.port, () => {
+server = app.listen(config.port, () => {
   log("Configuration:", config)
   console.log(getTime(),`Listening at http://localhost:${config.port}`)
 })
