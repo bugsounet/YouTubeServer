@@ -144,11 +144,15 @@ app.get('/', async (req, res) => {
 
   let access = await login(username, password, FreeDays)
   if (access) {
-    const id = uuid.v4()
-    log("Updating session for user:", username, id)
-    req.session.userId = id
-    req.session.username = username
-    res.sendFile(path.join(__dirname, '../html/youtube.html'))
+    if (req.query.v && (req.query.v == "beta")) {
+      const id = uuid.v4()
+      log("Updating session for user:", username, id)
+      req.session.userId = id
+      req.session.username = username
+      res.sendFile(path.join(__dirname, '../html/youtube.html'))
+    } else {
+      res.sendFile(path.join(__dirname, '../html/youtubev2.html'))
+    }
   }
   else res.sendFile(path.join(__dirname, '../html/403.html'))
 })
@@ -161,7 +165,7 @@ app.get('/TweenMax.js', (req, res) => {
   res.sendFile(path.join(__dirname, '../html/TweenMax.min.js'))
 })
 
-app.post("/test", (req, res) => {
+app.post("/volumeControl", (req, res) => {
   let session = req.body.session
   let username = req.body.username
   let volumeControl = {
