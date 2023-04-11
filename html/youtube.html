@@ -11,6 +11,8 @@
           this.error = error
 
           this.YTPlayer = null
+          this.socket = null
+          this.key = null
           this.YTStarted = false
           this.list = false
           this.playerVars= {
@@ -45,23 +47,39 @@
           }
 
           this.errorYT = false
+
           function getParameterByName(name) {
-            let url = window.location.href;
+            let url = window.location.href
        
-            name = name.replace(/[\[\]]/g, "\\$&");
-            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
-            var results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, " "));
+            name = name.replace(/[\[\]]/g, "\\$&")
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)")
+            var results = regex.exec(url)
+            if (!results) return null
+            if (!results[2]) return ''
+            return decodeURIComponent(results[2].replace(/\+/g, " "))
           }
-          this.id = getParameterByName('id') ? getParameterByName('id') : "sOnqjkJTMaA";
+          this.id = getParameterByName('id') ? getParameterByName('id') : "sOnqjkJTMaA"
           console.log("[YT] YOUTUBE Class Loaded")
         }
        
         init() {
           this.YTPlayer = new YT.Player(this.idDom, this.makeOptions())
           console.log("YOUTUBE API is ready.")
+          this.socket = new WebSocket('wss://testing.bugsounet.fr')
+          this.socket.onopen = function () {
+            console.log("Connected to wss!")
+          }
+          this.socket.onmessage = (evt) => {
+            var msg = evt.data
+            try {
+              var data = JSON.parse(msg)
+            } catch (e) { console.warn(e) }
+            if (data.session) console.log("[YT] SESSION:", data.session)
+            if (data.volume) {
+              console.log("[YT] Set volume to:", data.volume)
+              this.YTPlayer["setVolume"](data.volume)
+            }
+          }
         }
 
         makeOptions(options={}) {
@@ -72,13 +90,14 @@
 
           options.events.onReady = (ev) => {
             console.log("[YT] YT Player is ready for playing:", this.id)
+            if (this.socket) this.socket.send("HELLO")
             this.load({type: "id", id: this.id})
           }
 
           options.events.onError = (ev) => {
             this.errorYT = true
             if (ev.data == "2") ev.target.stopVideo()
-            console.log(`[GA:EXT] YT Error ${ev.data}:`, this.err[ev.data] ? this.err[ev.data] : "Unknown Error")
+            console.log(`[YT] YT Error ${ev.data}:`, this.err[ev.data] ? this.err[ev.data] : "Unknown Error")
             if (this.error) this.error(`YouTube Error ${ev.data}: ` + (this.err[ev.data] ? this.err[ev.data] : "Unknown Error"))
             this.ended(true)
           }
@@ -169,21 +188,22 @@
       api.src = "https://www.youtube.com/iframe_api"
       var writeScript = document.getElementsByTagName("script")[0]
       writeScript.parentNode.insertBefore(api, writeScript)
+
       window.onYouTubeIframeAPIReady = async () => {
         this.player = await new YOUTUBE(
-            "YT_Player",
-            (status) => {
-              console.log("[YT] Status:", status)
-            },
-            (title) => {
-              console.log("[YT] Title:", title)
-            },
-            (ended) => {
-              console.log("[YT] Ended:", ended)
-            },
-            (error) => {
-              console.log("[YT] Error:", error)
-            }
+          "YT_Player",
+          (status) => {
+            console.log("[YT] Status:", status)
+          },
+          (title) => {
+            console.log("[YT] Title:", title)
+          },
+          (ended) => {
+            console.log("[YT] Ended:", ended)
+          },
+          (error) => {
+            console.log("[YT] Error:", error)
+          }
         )
         this.player.init()
       }
