@@ -65,7 +65,7 @@
         init() {
           this.YTPlayer = new YT.Player(this.idDom, this.makeOptions())
           console.log("YOUTUBE API is ready.")
-          this.socket = new WebSocket('wss://testing.bugsounet.fr')
+          this.socket = new WebSocket('wss://youtube.bugsounet.fr')
           this.socket.onopen = function () {
             console.log("Connected to wss!")
           }
