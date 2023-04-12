@@ -256,7 +256,7 @@ wss.on('connection', (ws, request) => {
           ws.isAlive = false
           ws.ping()
         }
-      }, 5000)
+      }, 20000)
       log("HELLO YouTube Player from", username )
       return ws.send(JSON.stringify(data))
     }
