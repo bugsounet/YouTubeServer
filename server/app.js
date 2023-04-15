@@ -147,7 +147,7 @@ app.get('/', async (req, res) => {
     if (username == "null" || password == "null") res.sendFile(path.join(__dirname, '../html/youtube-withoutSocket.html')) // for Freeday
     else {
       const id = uuid.v4()
-      log("Updating session for user:", username, id)
+      log("[" + username + "]", "Updating session:", id)
       req.session.userId = id
       req.session.username = username
       res.sendFile(path.join(__dirname, '../html/youtube.html'))
@@ -177,7 +177,7 @@ app.post("/volumeControl", (req, res) => {
   if (database[username]) {
     if (database[username].userId == session) {
       if (database[username].socket) {
-        log("Received:", req.body)
+        log("[" + username + "]", "Volume Control:", req.body)
         database[username].socket.send(JSON.stringify(volumeControl))
         return res.send(JSON.stringify(volumeControl))
       } else {
@@ -231,7 +231,7 @@ wss.on('connection', (ws, request) => {
   ws.on('error', console.error)
   ws.on('pong', (what) => {
     ws.isAlive = true
-    log("heartbeat...", username, userId)
+    log("[" + username + "]","heartbeat...", userId)
   })
   ws.on('message', (message) => {
     if (message == "HELLO") {
@@ -252,14 +252,14 @@ wss.on('connection', (ws, request) => {
           ws.ping()
         }
       }, 20000)
-      log("HELLO YouTube Player from", username )
+      log("[" + username + "]", "HELLO YouTube Player")
       return ws.send(JSON.stringify(data))
     }
     log(`Received message ${message} from user ${userId}`, username)
   })
 
   ws.on('close', () => {
-    log("close:", username, userId)
+    log("[" + username + "]", "Close Socket:", userId)
     database[username].socket = null
     database[username].userId = null
     clearInterval(database[username].heartbeat)
