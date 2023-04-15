@@ -144,15 +144,11 @@ app.get('/', async (req, res) => {
 
   let access = await login(username, password, FreeDays)
   if (access) {
-    if (req.query.v && (req.query.v == "beta")) {
-      const id = uuid.v4()
-      log("Updating session for user:", username, id)
-      req.session.userId = id
-      req.session.username = username
-      res.sendFile(path.join(__dirname, '../html/youtube.html'))
-    } else {
-      res.sendFile(path.join(__dirname, '../html/youtubev2.html'))
-    }
+    const id = uuid.v4()
+    log("Updating session for user:", username, id)
+    req.session.userId = id
+    req.session.username = username
+    res.sendFile(path.join(__dirname, '../html/youtube.html'))
   }
   else res.sendFile(path.join(__dirname, '../html/403.html'))
 })
