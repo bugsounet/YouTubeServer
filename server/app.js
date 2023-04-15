@@ -207,16 +207,12 @@ const wss = new WebSocketServer({ clientTracking: false, noServer: true })
 server.on('upgrade', function (request, socket, head) {
   socket.on('error', onSocketError)
 
-  log('Parsing session from request...')
-
   sessionParser(request, {}, () => {
     if (!request.session.userId) {
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
       socket.destroy()
       return
     }
-
-    log('Session is parsed!')
 
     socket.removeListener('error', onSocketError)
 
