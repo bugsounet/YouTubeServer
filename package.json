@@ -1,7 +1,7 @@
 {
   "name": "YouTubeServer",
-  "version": "2.0.0",
-  "rev": "230319",
+  "version": "3.0.0",
+  "rev": "230415",
   "description": "YouTube Web Server",
   "main": "server/app.js",
   "scripts": {
@@ -18,6 +18,9 @@
   },
   "dependencies": {
     "express": "^4.18.2",
-    "moment": "^2.29.4"
+    "express-session": "^1.17.3",
+    "moment": "^2.29.4",
+    "uuid": "^9.0.0",
+    "ws": "^8.13.0"
   }
 }
