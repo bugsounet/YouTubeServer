@@ -144,7 +144,7 @@ app.get('/', async (req, res) => {
 
   let access = await login(username, password, FreeDays)
   if (access) {
-    if (username == "null" && password == "null") res.sendFile(path.join(__dirname, '../html/youtube-withoutSocket.html')) // for Freeday
+    if (username == "null" || password == "null") res.sendFile(path.join(__dirname, '../html/youtube-withoutSocket.html')) // for Freeday
     else {
       const id = uuid.v4()
       log("Updating session for user:", username, id)
