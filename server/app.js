@@ -253,7 +253,7 @@ wss.on('connection', (ws, request) => {
   ws.on('error', console.error)
   ws.on('pong', (what) => {
     ws.isAlive = true
-    log("[" + username + "]","heartbeat...", userId)
+    //log("[" + username + "]","heartbeat...", userId)
   })
   ws.on('message', (message) => {
     if (message == "HELLO") {
