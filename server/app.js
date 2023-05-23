@@ -12,7 +12,7 @@ const app = express()
 const map = new Map()
 
 const { WebSocket, WebSocketServer } = require('ws')
-
+const axios = require('axios')
 
 var config = {}
 var myDefault = {
@@ -116,6 +116,25 @@ var dates = {
     }
 }
 
+function getOrigin(ip) {
+  let Origin = {
+    country: "unknow",
+    isp: "unknow"
+  }
+  return new Promise(resolve=> {
+    axios.get("https://api.iplocation.net/?ip="+ip)
+      .then(response => {
+        Origin.country = response.data.country_name
+        Origin.isp = response.data.isp
+      })
+      .catch(err => {
+        console.log("Error Origin:" + err)
+      })
+      .finally(() => {
+        resolve(Origin)
+      })
+  })
+}
 /** main code **/
 
 app.use(bodyParser.json())
@@ -134,8 +153,10 @@ app.get('/', async (req, res) => {
 
   var FreeDays = dates.inRange(now, startDate, endDate) || config.ForceFreeDays
   var ip = req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress
+  log("---")
+  var info = await getOrigin(ip)
 
-  log("["+ip+"] Query:", req.query)
+  log("["+ip+"|"+info.country+"|"+info.isp+"] Query:", req.query)
 
   if (!req.query.id) return res.sendFile(path.join(__dirname, '../html/403.html'))
 
@@ -154,6 +175,7 @@ app.get('/', async (req, res) => {
     }
   }
   else res.sendFile(path.join(__dirname, '../html/403.html'))
+  log("---")
 })
 
 app.get('/403.css', (req, res) => {
