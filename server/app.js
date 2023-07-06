@@ -166,12 +166,14 @@ app.get('/', async (req, res) => {
   let access = await login(username, password, FreeDays)
   if (access) {
     if (username == "null" || password == "null") res.sendFile(path.join(__dirname, '../html/youtube-withoutSocket.html')) // for Freeday
-    else {
+    else if (database[username]) {
       const id = uuid.v4()
       log("[" + username + "]", "Updating session:", id)
       req.session.userId = id
       req.session.username = username
       res.sendFile(path.join(__dirname, '../html/youtube.html'))
+    } else {
+      res.sendFile(path.join(__dirname, '../html/youtube-withoutSocket.html')) // for Freeday
     }
   }
   else res.sendFile(path.join(__dirname, '../html/403.html'))
@@ -256,7 +258,7 @@ wss.on('connection', (ws, request) => {
     //log("[" + username + "]","heartbeat...", userId)
   })
   ws.on('message', (message) => {
-    if (message == "HELLO") {
+    if (message == "HELLO" && database[username]) {
       let data = {
         session: userId
       }
@@ -277,10 +279,14 @@ wss.on('connection', (ws, request) => {
       log("[" + username + "]", "HELLO YouTube Player")
       return ws.send(JSON.stringify(data))
     }
-    log(`Received message ${message} from user ${userId}`, username)
+    log(`Catch message ${message} from user ${userId}`, username)
   })
 
   ws.on('close', () => {
+    if (!database[username]) {
+      map.delete(userId)
+      return
+    }
     log("[" + username + "]", "Close Socket:", userId)
     database[username].socket = null
     database[username].userId = null
