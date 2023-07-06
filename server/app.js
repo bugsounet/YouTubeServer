@@ -12,7 +12,7 @@ const app = express()
 const map = new Map()
 
 const { WebSocket, WebSocketServer } = require('ws')
-
+const axios = require('axios')
 
 var config = {}
 var myDefault = {
@@ -116,6 +116,25 @@ var dates = {
     }
 }
 
+function getOrigin(ip) {
+  let Origin = {
+    country: "unknow",
+    isp: "unknow"
+  }
+  return new Promise(resolve=> {
+    axios.get("https://api.iplocation.net/?ip="+ip)
+      .then(response => {
+        Origin.country = response.data.country_name
+        Origin.isp = response.data.isp
+      })
+      .catch(err => {
+        console.log("Error Origin:" + err)
+      })
+      .finally(() => {
+        resolve(Origin)
+      })
+  })
+}
 /** main code **/
 
 app.use(bodyParser.json())
@@ -134,8 +153,10 @@ app.get('/', async (req, res) => {
 
   var FreeDays = dates.inRange(now, startDate, endDate) || config.ForceFreeDays
   var ip = req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress
+  log("---")
+  var info = await getOrigin(ip)
 
-  log("["+ip+"] Query:", req.query)
+  log("["+ip+"|"+info.country+"|"+info.isp+"] Query:", req.query)
 
   if (!req.query.id) return res.sendFile(path.join(__dirname, '../html/403.html'))
 
@@ -144,13 +165,19 @@ app.get('/', async (req, res) => {
 
   let access = await login(username, password, FreeDays)
   if (access) {
-    const id = uuid.v4()
-    log("Updating session for user:", username, id)
-    req.session.userId = id
-    req.session.username = username
-    res.sendFile(path.join(__dirname, '../html/youtube.html'))
+    if (username == "null" || password == "null") res.sendFile(path.join(__dirname, '../html/youtube-withoutSocket.html')) // for Freeday
+    else if (database[username]) {
+      const id = uuid.v4()
+      log("[" + username + "]", "Updating session:", id)
+      req.session.userId = id
+      req.session.username = username
+      res.sendFile(path.join(__dirname, '../html/youtube.html'))
+    } else {
+      res.sendFile(path.join(__dirname, '../html/youtube-withoutSocket.html')) // for Freeday
+    }
   }
   else res.sendFile(path.join(__dirname, '../html/403.html'))
+  log("---")
 })
 
 app.get('/403.css', (req, res) => {
@@ -174,7 +201,7 @@ app.post("/volumeControl", (req, res) => {
   if (database[username]) {
     if (database[username].userId == session) {
       if (database[username].socket) {
-        log("Received:", req.body)
+        log("[" + username + "]", "Volume Control:", req.body)
         database[username].socket.send(JSON.stringify(volumeControl))
         return res.send(JSON.stringify(volumeControl))
       } else {
@@ -204,16 +231,12 @@ const wss = new WebSocketServer({ clientTracking: false, noServer: true })
 server.on('upgrade', function (request, socket, head) {
   socket.on('error', onSocketError)
 
-  log('Parsing session from request...')
-
   sessionParser(request, {}, () => {
     if (!request.session.userId) {
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
       socket.destroy()
       return
     }
-
-    log('Session is parsed!')
 
     socket.removeListener('error', onSocketError)
 
@@ -232,10 +255,10 @@ wss.on('connection', (ws, request) => {
   ws.on('error', console.error)
   ws.on('pong', (what) => {
     ws.isAlive = true
-    log("heartbeat...", username, userId)
+    //log("[" + username + "]","heartbeat...", userId)
   })
   ws.on('message', (message) => {
-    if (message == "HELLO") {
+    if (message == "HELLO" && database[username]) {
       let data = {
         session: userId
       }
@@ -253,14 +276,18 @@ wss.on('connection', (ws, request) => {
           ws.ping()
         }
       }, 20000)
-      log("HELLO YouTube Player from", username )
+      log("[" + username + "]", "HELLO YouTube Player")
       return ws.send(JSON.stringify(data))
     }
-    log(`Received message ${message} from user ${userId}`, username)
+    log(`Catch message ${message} from user ${userId}`, username)
   })
 
   ws.on('close', () => {
-    log("close:", username, userId)
+    if (!database[username]) {
+      map.delete(userId)
+      return
+    }
+    log("[" + username + "]", "Close Socket:", userId)
     database[username].socket = null
     database[username].userId = null
     clearInterval(database[username].heartbeat)
