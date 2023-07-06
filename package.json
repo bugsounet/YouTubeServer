@@ -1,12 +1,12 @@
 {
   "name": "YouTubeServer",
-  "version": "3.1.0",
-  "rev": "230523",
+  "version": "3.1.1",
+  "rev": "230706",
   "description": "YouTube Web Server",
   "main": "server/app.js",
   "scripts": {
     "start": "node server/app.js",
-    "password": "node server/password.js"
+    "password": "node database/password.js"
   },
   "author": "bugsounet",
   "license": "MIT",
