@@ -1,7 +1,7 @@
 {
   "name": "YouTubeServer",
-  "version": "3.1.1",
-  "rev": "230706",
+  "version": "3.1.2",
+  "rev": "231217",
   "description": "YouTube Web Server",
   "main": "server/app.js",
   "scripts": {
